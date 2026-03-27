@@ -117,7 +117,7 @@ const criar = async (req, res) => {
     });
   } catch (error) {
     console.error('[chamados.criar]', error);
-    return res.status(500).json({ mensagem: 'Erro no servidor' });
+    return res.status(500).json({ mensagem: 'Erro no servidor.' });
   }
 };
 

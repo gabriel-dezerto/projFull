@@ -51,7 +51,7 @@ const registro = async (req, res) => {
 
   } catch (error) {
     console.error('Erro no registro:', error);
-    return res.status(500).json({ mensagem: 'Erro no servidor' });
+    return res.status(500).json({ mensagem: 'Erro no servidor.' });
   }
 };
 
@@ -63,7 +63,6 @@ const login = async (req, res) => {
 
   // Validação dos campos 
   if(!email || !senha){
-    console.log('Email ou senha não fornecidos');
     return res.status(400).json({ mensagem: "Email e senha são obrigatórios" });
   }
 
@@ -73,7 +72,6 @@ const login = async (req, res) => {
 
     // Se o email não existir, retorna erro
     if(linhas.length === 0) {
-      console.log('Email não encontrado:', email);
       return res.status(401).json({ mensagem: 'Email ou senha incorretos' });
     }
 
@@ -106,7 +104,7 @@ const login = async (req, res) => {
 
   } catch (error) {
     console.error('Erro no login:', error);
-    return res.status(500).json({ mensagem: 'Erro no servidor' });
+    return res.status(500).json({ mensagem: 'Erro no servidor.' });
   }
 
 };
