@@ -1,7 +1,7 @@
 // =============================================
 // CONTROLLER DE HISTÓRICO DE MANUTENÇÃO
 // =============================================
-// TODO (alunos): implementar cada função abaixo.
+
 
 const db = require('../config/database');
 

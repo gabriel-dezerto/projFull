@@ -1,7 +1,7 @@
 // =============================================
 // CONTROLLER DE CHAMADOS
 // =============================================
-// TODO (alunos): implementar cada função abaixo.
+
 //
 // Fluxo de status:
 //   aberto -> em_atendimento -> resolvido

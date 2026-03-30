@@ -2,7 +2,7 @@
 // CONTROLLER DE DASHBOARD
 // =============================================
 // Usa as VIEWS do banco para retornar dados agregados.
-// TODO (alunos): implementar cada função abaixo.
+
 
 const db = require('../config/database');
 
