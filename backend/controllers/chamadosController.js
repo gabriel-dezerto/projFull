@@ -16,13 +16,13 @@ const status_validos = ['aberto', 'em_atendimento', 'resolvido', 'cancelado'];
 //   admin/técnico -> todos os chamados
 //   cliente       -> apenas os seus (WHERE cliente_id = req.usuario.id)
 const listar = async (req, res) => {
-  const { papel, id } = req.usuario;
+  const { nivel_acesso, id } = req.usuario;
 
   try {
     let linhas;
 
     // Seleciona todos os chamados para o admin e o tecnico
-    if (papel === 'admin' || papel === 'tecnico') {
+    if (nivel_acesso === 'admin' || nivel_acesso === 'tecnico') {
       [linhas] = await db.query(
         'SELECT c.id, c.titulo, c.prioridade, c.status, c.aberto_em, c.atualizado_em, u.nome AS cliente_nome, e.nome AS equipamento_nome, t.nome AS tecnico_nome FROM chamados c JOIN usuarios u ON u.id=c.cliente_id JOIN equipamentos e ON e.id=c.equipamento_id LEFT JOIN usuarios t ON t.id=c.tecnico_id ORDER BY c.prioridade DESC, c.aberto_em DESC'
       );
@@ -46,7 +46,7 @@ const listar = async (req, res) => {
 const buscarPorId = async (req, res) => {
   // TODO
   const { id: chamado_id } = req.params;
-  const { papel, id: usuario_id } = req.usuario;
+  const { nivel_acesso, id: usuario_id } = req.usuario;
 
   try {
     // Seleciona o chamado de acordo com o Id procurado
@@ -61,7 +61,7 @@ const buscarPorId = async (req, res) => {
 
     const chamado = linhas[0];
 
-    if (papel === "cliente" && chamado.cliente_id !== usuario_id) {
+    if (nivel_acesso === "cliente" && chamado.cliente_id !== usuario_id) {
       return res.status(403).json({ mensagem: 'Acesso negado' });
     }
 

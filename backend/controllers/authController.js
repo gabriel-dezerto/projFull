@@ -90,10 +90,10 @@ const login = async (req, res) => {
         id: usuario.id,
         nome: usuario.nome,
         email: usuario.email,
-        papel: usuario.nivel_acesso
+        nivel_acesso: usuario.nivel_acesso
       },
       process.env.JWT_SECRET,
-      { expiresIn: '8h' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
     );
 
     // Retorna o login do usuário e o token JWT
