@@ -27,7 +27,7 @@ const app = express();
 // Permite que o Express leia o corpo das requisições em JSON
 app.use(express.json());
 
-// Cors para permitir o frontend rodar em outra porta (3000) e se comunicar com o backend (3001)
+// Cors para permitir o frontend rodar em outra porta (3000) e se comunicar com o backend (8080)
 const cors = require('cors');
 app.use(cors({
   origin: 'http://localhost:3000', 
