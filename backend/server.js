@@ -27,9 +27,13 @@ const app = express();
 // Permite que o Express leia o corpo das requisições em JSON
 app.use(express.json());
 
-// TODO (opcional): adicionar cors se o frontend rodar em outra porta
-// const cors = require('cors');
-// app.use(cors());
+// Cors para permitir o frontend rodar em outra porta (3000) e se comunicar com o backend (3001)
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://localhost:3000', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 
 // ---- Registro das rotas ----
 // Cada prefixo aponta para um arquivo de rotas separado
