@@ -28,7 +28,7 @@ const Login1 = ({
 
   buttonText = "Login",
   signupText = "Não tem uma conta?",
-  signupUrl = "/src/app/registro/page.jsx",
+  signupUrl = "/registro",
   className
 }) => {
 
@@ -48,7 +48,7 @@ const Login1 = ({
             className="flex w-full max-w-sm min-w-sm flex-col items-center gap-y-4 rounded-md border border-muted bg-background px-6 py-8 shadow-md">
             {heading && <h1 className="text-xl font-bold">{heading}</h1>}
             <Input type="email" placeholder="Email" className="text-sm focus-visible:ring-[#3078AA]/40 focus-visible:border-[#3078AA]" required />
-            <Input type="password" placeholder="Password" className="text-sm focus-visible:ring-[#3078AA]/40 focus-visible:border-[#3078AA]" required />
+            <Input type="password" placeholder="Senha" className="text-sm focus-visible:ring-[#3078AA]/40 focus-visible:border-[#3078AA]" required />
             <Button type="submit" className="w-full bg-[#3078AA]" onClick={() => router.push("/src/app/dashboard/page.jsx")}>
               {buttonText}
             </Button>
