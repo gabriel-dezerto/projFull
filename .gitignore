@@ -3,10 +3,8 @@ backend/uploads/images/fotos/*
 backend/uploads/images/alunos/*
 backend/uploads/images/incidentes/*
 backend/logs/*
-frontend/public/fotos/
 *.jpg
 *.jpeg
-*.png
 *.gif
 *.webp
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
