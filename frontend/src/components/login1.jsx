@@ -1,68 +1,99 @@
-'use client'
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { Inter, JetBrains_Mono } from "next/font/google";
-import { useRouter } from "next/navigation";
+import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Logo } from '@/components/logo';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-});
+export function Login1() {
+  const { login } = useAuth();
+  const [form, setForm] = useState({ email: '', senha: '' });
+  const [carregando, setCarregando] = useState(false);
 
-const Login1 = ({
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  heading = "Login",
-
-  logo = {
-    url: "",
-    src: "/logo_techrent.png",
-    alt: "logo",
-    title: "TechRent",
-  },
-
-  buttonText = "Login",
-  signupText = "Não tem uma conta?",
-  signupUrl = "/registro",
-  className
-}) => {
-
-  const router = useRouter();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setCarregando(true);
+    try {
+      await login(form.email, form.senha);
+      toast.success('Login realizado com sucesso!');
+    } catch (err) {
+      toast.error(err.message || 'Credenciais inválidas. Tente novamente.');
+    } finally {
+      setCarregando(false);
+    }
+  };
 
   return (
-    <section className={cn("h-screen bg-muted", inter.className, className) } >
-      <div className="flex h-full items-center justify-center bg-[#DFF2F9]">
+    <section className="min-h-screen flex items-center justify-center bg-[#DFF2F9] px-4">
+      <div className="flex flex-col items-center gap-6 w-full max-w-sm">
         {/* Logo */}
-        <div className="flex flex-col items-center gap-6 lg:justify-start">
-            <img
-              src={logo.src}
-              alt={logo.alt}
-              title={logo.title}
-              className="h-40 dark:invert" />
-          <div
-            className="flex w-full max-w-sm min-w-sm flex-col items-center gap-y-4 rounded-md border border-muted bg-background px-6 py-8 shadow-md">
-            {heading && <h1 className="text-xl font-bold">{heading}</h1>}
-            <Input type="email" placeholder="Email" className="text-sm focus-visible:ring-[#3078AA]/40 focus-visible:border-[#3078AA]" required />
-            <Input type="password" placeholder="Senha" className="text-sm focus-visible:ring-[#3078AA]/40 focus-visible:border-[#3078AA]" required />
-            <Button type="submit" className="w-full bg-[#3078AA]" onClick={() => router.push("/src/app/dashboard/page.jsx")}>
-              {buttonText}
-            </Button>
-          </div>
-          <div className="flex justify-center gap-1 text-sm text-muted-foreground">
-            <p>{signupText}</p>
-            <a href={signupUrl} className="font-medium text-primary hover:underline">
-              Cadastre-se
-            </a>
-          </div>
+        <div className="flex flex-col items-center gap-2">
+          <Logo className="h-8 text-[#1a5276]" />
+          <p className="text-sm text-slate-500">Sistema de Chamados de TI</p>
         </div>
+
+        {/* Card de login */}
+        <div className="w-full rounded-xl border border-blue-100 bg-white px-6 py-8 shadow-md">
+          <h1 className="mb-6 text-center text-xl font-semibold text-[#1a5276]">
+            Entrar na conta
+          </h1>
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="email" className="text-slate-700">E-mail</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={form.email}
+                onChange={handleChange}
+                required
+                className="focus-visible:ring-[#3078AA]/40 focus-visible:border-[#3078AA]"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="senha" className="text-slate-700">Senha</Label>
+              <Input
+                id="senha"
+                name="senha"
+                type="password"
+                placeholder="••••••••"
+                value={form.senha}
+                onChange={handleChange}
+                required
+                className="focus-visible:ring-[#3078AA]/40 focus-visible:border-[#3078AA]"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={carregando}
+              className="mt-1 w-full bg-[#3078AA] hover:bg-[#2567a0] text-white"
+            >
+              {carregando ? 'Entrando...' : 'Entrar'}
+            </Button>
+          </form>
+        </div>
+
+        <p className="text-sm text-slate-500">
+          Não tem uma conta?{' '}
+          <Link href="/registro" className="font-medium text-[#3078AA] hover:underline">
+            Cadastre-se
+          </Link>
+        </p>
       </div>
     </section>
   );
-};
+}
 
-export { Login1 };
+export default Login1;
