@@ -44,12 +44,12 @@ function NovaManutencaoForm() {
         setChamados(emAtendimento);
 
         if (chamadoIdParam) {
-          const chamado = await chamadosAPI.buscarPorId(chamadoIdParam);
+          const chamado = emAtendimento.find((c) => String(c.id) === chamadoIdParam);
           if (chamado) {
             setChamadoSelecionado(chamado);
             setForm((prev) => ({
               ...prev,
-              chamado_id: chamadoIdParam,
+              chamado_id: String(chamado.id),
               equipamento_id: String(chamado.equipamento_id || ''),
             }));
           }
@@ -63,18 +63,15 @@ function NovaManutencaoForm() {
     carregar();
   }, [chamadoIdParam]);
 
-  const handleChamadoChange = async (value) => {
-    setForm({ ...form, chamado_id: value, equipamento_id: '' });
-    try {
-      const chamado = await chamadosAPI.buscarPorId(value);
+  const handleChamadoChange = (value) => {
+    const chamado = chamados.find((c) => String(c.id) === value);
+    if (chamado) {
       setChamadoSelecionado(chamado);
-      setForm((prev) => ({
-        ...prev,
-        chamado_id: value,
+      setForm({
+        chamado_id: String(chamado.id),
         equipamento_id: String(chamado.equipamento_id || ''),
-      }));
-    } catch {
-      setChamadoSelecionado(null);
+        descricao: form.descricao,
+      });
     }
   };
 
@@ -138,9 +135,9 @@ function NovaManutencaoForm() {
             <div className="flex flex-col gap-1.5">
               <Label>Chamado em atendimento <span className="text-destructive">*</span></Label>
               <Select
-                value={form.chamado_id}
+                value={form.chamado_id || ''}
                 onValueChange={handleChamadoChange}
-                disabled={carregandoChamados || !!chamadoIdParam}
+                disabled={carregandoChamados}
               >
                 <SelectTrigger className="focus-visible:ring-[#3078AA]/40 focus-visible:border-[#3078AA]">
                   <SelectValue placeholder={carregandoChamados ? 'Carregando...' : 'Selecione o chamado'} />
