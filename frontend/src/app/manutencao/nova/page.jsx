@@ -64,22 +64,35 @@ function NovaManutencaoForm() {
   }, [chamadoIdParam]);
 
   const handleChamadoChange = (value) => {
+    console.log('Chamado selecionado (ID):', value);
     const chamado = chamados.find((c) => String(c.id) === value);
     if (chamado) {
+      console.log('Dados do chamado encontrado:', chamado);
       setChamadoSelecionado(chamado);
-      setForm({
+      setForm((prev) => ({
+        ...prev,
         chamado_id: String(chamado.id),
         equipamento_id: String(chamado.equipamento_id || ''),
-        descricao: form.descricao,
-      });
+      }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.chamado_id || !form.equipamento_id) {
+    console.log('Tentando enviar formulário:', form);
+    if (!form.chamado_id) {
       toast.error('Selecione um chamado.');
       return;
+    }
+    if (!form.equipamento_id) {
+      // Tentar recuperar o equipamento_id do chamado selecionado se estiver faltando
+      const idEquip = chamadoSelecionado?.equipamento_id;
+      if (idEquip) {
+        form.equipamento_id = String(idEquip);
+      } else {
+        toast.error('Erro: Equipamento não encontrado para este chamado.');
+        return;
+      }
     }
     if (!form.descricao.trim()) {
       toast.error('Descreva o que foi feito.');
