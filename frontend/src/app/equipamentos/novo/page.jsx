@@ -85,7 +85,7 @@ export default function NovoEquipamentoPage() {
                   <Input
                     id="nome"
                     name="nome"
-                    placeholder="Ex: Notebook Dell Latitude"
+                    placeholder="Ex: Mouse Logitech MX Master 3"
                     value={form.nome}
                     onChange={handleChange}
                     required
@@ -112,7 +112,7 @@ export default function NovoEquipamentoPage() {
                     <Input
                       id="patrimonio"
                       name="patrimonio"
-                      placeholder="Ex: TI-2024-001"
+                      placeholder="Ex: MS-001"
                       value={form.patrimonio}
                       onChange={handleChange}
                       required
