@@ -22,7 +22,6 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@shadcnblocks": "https://shadcnblocks.com/r/{name}.json",
-    "@efferd": "https://efferd.com/r/{style}/{name}.json"
+    "@shadcnblocks": "https://shadcnblocks.com/r/{name}.json"
   }
 }
