@@ -1,8 +1,22 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { Inter, JetBrains_Mono } from "next/font/google";
+import { useRouter } from "next/navigation";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+});
 
 const Login1 = ({
+
   heading = "Login",
 
   logo = {
@@ -17,22 +31,25 @@ const Login1 = ({
   signupUrl = "/src/app/registro/page.jsx",
   className
 }) => {
+
+  const router = useRouter();
+
   return (
-    <section className={cn("h-screen bg-muted", className)}>
-      <div className="flex h-full items-center justify-center">
+    <section className={cn("h-screen bg-muted", inter.className, className) } >
+      <div className="flex h-full items-center justify-center bg-[#DFF2F9]">
         {/* Logo */}
         <div className="flex flex-col items-center gap-6 lg:justify-start">
             <img
               src={logo.src}
               alt={logo.alt}
               title={logo.title}
-              className="h-30 dark:invert" />
+              className="h-40 dark:invert" />
           <div
             className="flex w-full max-w-sm min-w-sm flex-col items-center gap-y-4 rounded-md border border-muted bg-background px-6 py-8 shadow-md">
-            {heading && <h1 className="text-xl font-semibold">{heading}</h1>}
-            <Input type="email" placeholder="Email" className="text-sm" required />
-            <Input type="password" placeholder="Password" className="text-sm" required />
-            <Button type="submit" className="w-full">
+            {heading && <h1 className="text-xl font-bold">{heading}</h1>}
+            <Input type="email" placeholder="Email" className="text-sm focus-visible:ring-[#3078AA]/40 focus-visible:border-[#3078AA]" required />
+            <Input type="password" placeholder="Password" className="text-sm focus-visible:ring-[#3078AA]/40 focus-visible:border-[#3078AA]" required />
+            <Button type="submit" className="w-full bg-[#3078AA]" onClick={() => router.push("/src/app/dashboard/page.jsx")}>
               {buttonText}
             </Button>
           </div>
