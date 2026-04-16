@@ -1,156 +1,259 @@
-## TechRent - MVP de Chamados / Manutencao (TI)
+# TechRent - Sistema de Chamados de TI
 
-Este MVP tem foco em centralizar o relato de problemas de TI, permitir que administradores gerenciem o fluxo e que tecnicos resolvam os chamados, com base no modelo de banco de dados presente em `bd/`.
+Um sistema completo de gerenciamento de chamados e manutenção de equipamentos de TI, construído com **Next.js 16**, **Shadcn/UI**, **Tailwind CSS**, **Express.js** e **MySQL**.
 
-> Observacao: o seu banco atual foi modelado com as tabelas e views abaixo; para o MVP de TI, alguns nomes foram mapeados conceitualmente (por exemplo, `alugueis` funciona como “chamados”).
+## 🚀 Quick Start
 
-## Stack (pretendida)
+```bash
+# 1. Setup do banco de dados
+mysql -u root -p < bd/schema.sql
+mysql -u root -p < bd/views.sql
 
-- Frontend: Next.js (App Router) + Tailwind CSS + shadcn/ui (Radix UI, Lucide, Sonner Toast)
-- Backend: Node.js + Express + JWT
-- Banco: MySQL
+# 2. Backend
+cd backend
+cp .env.example .env
+# Edite .env com suas credenciais MySQL
+npm install
+npm start
 
-## Modelo de Dados (MySQL)
-
-### Database
-
-- Nome: `techrent_db`
-- Scripts:
-  - `bd/schema.sql` (cria o banco e as tabelas)
-  - `bd/views.sql` (cria as views)
-
-### Tabelas
-
-`usuarios` (perfis do sistema)
-
-- `id` (PK, AUTO_INCREMENT)
-- `nome` (varchar(100), NOT NULL)
-- `email` (varchar(100), UNIQUE, NOT NULL)
-- `senha` (varchar(255), NOT NULL) -> armazena o hash para JWT/login
-- `nivel_acesso` (ENUM: `cliente`, `admin`, `tecnico`)
-- `criado_em` (TIMESTAMP, default CURRENT_TIMESTAMP)
-
-`equipamentos` (maquinas/equipamentos dos laboratorios)
-
-- `id` (PK, AUTO_INCREMENT)
-- `nome` (varchar(100), NOT NULL)
-- `categoria` (varchar(50), ex: Laptop, Projetor, Tablet)
-- `preco_diaria` (decimal(10,2), NOT NULL) -> no contexto de TI, pode ser usado como “custo/impacto” para metricao
-- `status` (ENUM: `disponivel`, `alugado`, `manutencao`) -> estado operacional
-- `descricao` (TEXT)
-
-`alugueis` (NO MVP: chamados/reservas de atendimento)
-
-- `id` (PK, AUTO_INCREMENT)
-- `usuario_id` (FK -> `usuarios.id`) -> quem abriu o chamado (cliente)
-- `equipamento_id` (FK -> `equipamentos.id`) -> qual equipamento sera atendido
-- `data_inicio` (DATE, NOT NULL) -> data de abertura
-- `data_fim` (DATE, NOT NULL) -> data prevista/limite
-- `valor_total` (decimal(10,2), NOT NULL) -> no contexto de TI, pode ser usado como custo estimado
-- `status_reserva` (ENUM: `pendente`, `ativo`, `finalizado`, `cancelado`) -> estado do chamado
-- Relacoes:
-  - ON DELETE CASCADE para `usuarios` e `equipamentos`
-
-`historico_manutencao` (NO MVP: registro do que o tecnico fez)
-
-- `id` (PK, AUTO_INCREMENT)
-- `equipamento_id` (FK -> `equipamentos.id`)
-- `tecnico_id` (FK -> `usuarios.id`) -> tecnico que registrou o reparo
-- `descricao_reparo` (TEXT)
-- `data_manutencao` (DATETIME, default CURRENT_TIMESTAMP)
-
-### Views
-
-`view_equipamentos_disponiveis`
-
-- Lista equipamentos com `equipamentos.status = 'disponivel'`
-
-`view_painel_tecnico`
-
-- Retorna chamados em `pendente` ou `ativo` (via `alugueis.status_reserva`)
-- Inclui `aluguel_id`, `cliente`, `equipamento`, `data_inicio` e `status_reserva`
-- Observacao: a view nao traz `tecnico_id` diretamente; a associacao do tecnico com a resolucao ocorre via `historico_manutencao`.
-
-`view_resumo_admin`
-
-- Agrupa por `equipamentos.status`
-- Colunas:
-  - `status`
-  - `total_itens` (COUNT)
-  - `potencial_receita_diaria` (SUM de `preco_diaria`)
-- Observacao: por enquanto essa metricacao e feita sobre `preco_diaria`. Para TI, voce pode adaptar o significado (por exemplo custo/impacto do equipamento).
-
-## Fluxos do MVP (mapeados ao banco)
-
-### 1) Usuario relata um problema
-
-Como o banco atual nao possui uma tabela chamada “chamados” explicitamente, o fluxo usa `alugueis`:
-
-- Criar um usuario com `nivel_acesso = 'cliente'`
-- Selecionar o equipamento (em geral com status `disponivel`, usando `view_equipamentos_disponiveis`)
-- Inserir um registro em `alugueis` com:
-  - `usuario_id` = id do usuario logado
-  - `equipamento_id` = maquina afetada
-  - `data_inicio` e `data_fim`
-  - `valor_total` = estimativa (opcional no contexto TI)
-  - `status_reserva = 'pendente'`
-- Opcional (para refletir estado operacional):
-  - atualizar `equipamentos.status` para `alugado` ou `manutencao` (a regra pode ser definida pela sua logica de backend)
-
-### 2) Administrador gerencia a equipe
-
-O banco ja diferencia `admin` e `tecnico` em `usuarios.nivel_acesso`.
-
-Para o admin:
-- Utilizar `view_resumo_admin` para metricao do parque de equipamentos por status
-- Gerenciar acesso:
-  - controle de quem e `admin` ou `tecnico` e feito no proprio `usuarios.nivel_acesso`
-
-### 3) Tecnico resolve o chamado
-
-No MVP, o tecnico:
-
-- Visualiza chamados em execucao/abertos via `view_painel_tecnico` (status `pendente` ou `ativo`)
-- Quando inicia o atendimento:
-  - atualizar `alugueis.status_reserva` para `ativo` (regra do backend)
-- Quando resolve:
-  - inserir um registro em `historico_manutencao` com `equipamento_id`, `tecnico_id` e `descricao_reparo`
-  - atualizar `alugueis.status_reserva` para `finalizado`
-  - atualizar `equipamentos.status` para `disponivel` (ou outro estado definido)
-
-## Setup do banco (local)
-
-1. Criar a estrutura:
-   - execute `bd/schema.sql`
-2. Criar as views:
-   - execute `bd/views.sql`
-
-Exemplo (ordem sugerida):
-
-```sql
--- 1) Tabelas
-SOURCE bd/schema.sql;
-
--- 2) Views
-SOURCE bd/views.sql;
+# 3. Frontend (em outro terminal)
+cd frontend
+npm install
+npm run dev
 ```
 
-## Observacoes e lacunas do modelo atual
+Acesse `http://localhost:3000` e faça login!
 
-1. Nao existe `tecnico_id` direto na tabela `alugueis`.
-   - Se voce quiser “atribuicao” de tecnico ao chamado (para garantir que cada chamado pertence a um tecnico especifico), a modelagem atual precisa ser estendida (por exemplo, adicionar `tecnico_id` em `alugueis`).
-2. O modelo foi criado com terminologia de aluguel (tabela `alugueis`) e metrica em `preco_diaria`.
-   - No MVP de TI, isso funciona como adaptacao conceitual, mas pode exigir ajustes futuros de nomes/regras.
+**Para instruções detalhadas**, veja [SETUP.md](./SETUP.md)
 
-## Proximo passo (backend/contrato)
+---
 
-Como o `backend/` esta vazio neste workspace, o README acima descreve o “contrato” esperado do MVP em cima do banco.
+## 📋 Funcionalidades
 
-Ao implementar o Express + JWT, a recomendacao e:
-- Endpoints para:
-  - autenticar usuarios (JWT)
-  - listar/alterar `equipamentos`
-  - criar/atualizar “chamados” em `alugueis`
-  - registrar reparos em `historico_manutencao`
-  - dashboards usando as views `view_painel_tecnico` e `view_resumo_admin`
-- Regras de autorizacao por `usuarios.nivel_acesso`
+### Para Clientes
+- ✅ Abrir novos chamados
+- ✅ Listar seus chamados
+- ✅ Acompanhar status em tempo real
+
+### Para Técnicos
+- ✅ Dashboard com chamados pendentes
+- ✅ Iniciar atendimento
+- ✅ Registrar manutenção realizada
+- ✅ Histórico de reparos
+
+### Para Administradores
+- ✅ Dashboard com resumo de chamados e equipamentos
+- ✅ Gerenciar inventário de equipamentos
+- ✅ Visualizar histórico de manutenção
+- ✅ Controle de acesso por nível
+
+---
+
+## 🏗️ Arquitetura
+
+### Frontend
+- **Framework**: Next.js 16 (App Router)
+- **UI**: Shadcn/UI + Tailwind CSS
+- **Estado**: React Context (AuthContext)
+- **Autenticação**: JWT com localStorage
+- **HTTP**: Fetch API com interceptor de token
+
+### Backend
+- **Framework**: Express.js
+- **Autenticação**: JWT + bcryptjs
+- **Banco de Dados**: MySQL 8.0+
+- **CORS**: Habilitado para localhost:3000
+
+### Banco de Dados
+- **Tabelas**: `usuarios`, `equipamentos`, `chamados`, `historico_manutencao`
+- **Views**: `view_painel_tecnico`, `view_resumo_chamados`, `view_resumo_equipamentos`
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+projFull/
+├── backend/
+│   ├── controllers/      # Lógica de negócio
+│   ├── routes/           # Endpoints da API
+│   ├── middlewares/      # Autenticação JWT
+│   ├── config/           # Conexão MySQL
+│   ├── server.js         # Entrada
+│   ├── package.json
+│   └── .env.example
+├── frontend/
+│   ├── src/
+│   │   ├── app/          # Páginas (Next.js)
+│   │   ├── components/   # Componentes React
+│   │   ├── contexts/     # AuthContext
+│   │   ├── lib/          # API client, utils
+│   │   └── app/globals.css
+│   ├── package.json
+│   └── .env.local
+├── bd/
+│   ├── schema.sql        # Tabelas
+│   └── views.sql         # Views
+├── README.md
+└── SETUP.md              # Guia detalhado
+```
+
+---
+
+## 🔐 Fluxo de Autenticação
+
+1. **Registro**: Usuário cria conta com email, senha (bcrypt) e nível de acesso
+2. **Login**: Backend retorna JWT com payload `{ id, nome, email, nivel_acesso }`
+3. **Frontend**: Decodifica JWT, armazena em localStorage e redireciona conforme nível
+4. **Requisições**: Token enviado no header `Authorization: Bearer <token>`
+5. **Logout**: Remove token do localStorage e redireciona para login
+
+---
+
+## 📊 Fluxo de Chamados
+
+```
+Cliente abre chamado
+    ↓
+Equipamento muda status para "em_manutencao"
+    ↓
+Técnico vê chamado no dashboard
+    ↓
+Técnico inicia atendimento (status → "em_atendimento")
+    ↓
+Técnico registra manutenção
+    ↓
+Chamado marcado como "resolvido"
+Equipamento volta para "operacional"
+```
+
+---
+
+## 🎨 Design
+
+- **Cores TechRent**: Azul primário `#3078AA`, fundo claro `#DFF2F9`
+- **Componentes**: Shadcn/UI (Button, Card, Dialog, Select, etc.)
+- **Responsivo**: Tailwind CSS com breakpoints mobile-first
+- **Ícones**: Lucide React
+
+---
+
+## 🔌 Endpoints da API
+
+### Autenticação
+- `POST /auth/login` - Login
+- `POST /auth/registro` - Registro
+
+### Chamados
+- `GET /chamados` - Listar (filtrado por nível)
+- `GET /chamados/:id` - Detalhes
+- `POST /chamados` - Criar (cliente/admin)
+- `PUT /chamados/:id/status` - Atualizar status (técnico/admin)
+
+### Equipamentos
+- `GET /equipamentos` - Listar
+- `GET /equipamentos/:id` - Detalhes
+- `POST /equipamentos` - Criar (admin)
+- `PUT /equipamentos/:id` - Editar (admin)
+- `DELETE /equipamentos/:id` - Remover (admin)
+
+### Manutenção
+- `GET /manutencao` - Histórico (técnico/admin)
+- `POST /manutencao` - Registrar (técnico)
+
+### Dashboard
+- `GET /dashboard/admin` - Resumo (admin)
+- `GET /dashboard/tecnico` - Painel técnico (técnico/admin)
+
+---
+
+## 🛠️ Desenvolvimento
+
+### Adicionar um novo componente Shadcn
+
+```bash
+cd frontend
+npx shadcn-ui@latest add <component-name>
+```
+
+### Estrutura de uma página
+
+```jsx
+'use client';
+import { AppShell } from '@/components/app-shell';
+import ProtectedRoute from '@/components/ProtectedRoute';
+
+export default function MyPage() {
+  return (
+    <ProtectedRoute niveis={['admin']}>
+      <AppShell>
+        {/* Seu conteúdo aqui */}
+      </AppShell>
+    </ProtectedRoute>
+  );
+}
+```
+
+---
+
+## 📦 Dependências Principais
+
+### Frontend
+- `next@16.2.4` - Framework React
+- `react@19.2.4` - React
+- `tailwindcss@4.2.2` - Styling
+- `shadcn@4.1.2` - Componentes UI
+- `sonner@2.0.7` - Toasts
+- `lucide-react@1.7.0` - Ícones
+
+### Backend
+- `express@4.18.2` - Framework web
+- `mysql2@3.9.7` - Driver MySQL
+- `jsonwebtoken@9.0.2` - JWT
+- `bcryptjs@2.4.3` - Hash de senhas
+- `cors@2.8.6` - CORS
+- `dotenv@16.4.5` - Variáveis de ambiente
+
+---
+
+## 🐛 Troubleshooting
+
+**Erro: "Module not found: Can't resolve 'sonner'"**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+**Erro: "Can't connect to MySQL"**
+- Verifique se MySQL está rodando
+- Confirme credenciais em `backend/.env`
+- Verifique se o banco foi criado: `mysql -u root -p -e "SHOW DATABASES;"`
+
+**Erro: "JWT_SECRET is not defined"**
+- Copie `backend/.env.example` para `backend/.env`
+- Preencha as credenciais
+
+---
+
+## 📝 Licença
+
+Este projeto é fornecido como está para fins educacionais.
+
+---
+
+## 👤 Autor
+
+Desenvolvido como sistema de gerenciamento de chamados de TI.
+
+---
+
+## 🤝 Contribuindo
+
+Sinta-se livre para abrir issues e pull requests!
+
+---
+
+## 📞 Suporte
+
+Para dúvidas ou problemas, consulte [SETUP.md](./SETUP.md) ou abra uma issue no repositório.
