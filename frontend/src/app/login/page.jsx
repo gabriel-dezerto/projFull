@@ -1,9 +1,5 @@
-import { Login1 } from "@/components/login1";
+import { Login1 } from '@/components/login1';
 
-export default function Login(){
-    return(
-        <>
-            <Login1/>
-        </>
-    )
+export default function LoginPage() {
+  return <Login1 />;
 }
