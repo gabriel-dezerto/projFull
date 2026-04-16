@@ -13,8 +13,8 @@ const Login1 = ({
   },
 
   buttonText = "Login",
-  signupText = "Need an account?",
-  signupUrl = "https://shadcnblocks.com",
+  signupText = "Não tem uma conta?",
+  signupUrl = "/src/app/registro/page.jsx",
   className
 }) => {
   return (
@@ -39,7 +39,7 @@ const Login1 = ({
           <div className="flex justify-center gap-1 text-sm text-muted-foreground">
             <p>{signupText}</p>
             <a href={signupUrl} className="font-medium text-primary hover:underline">
-              Sign up
+              Cadastre-se
             </a>
           </div>
         </div>
